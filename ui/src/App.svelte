@@ -1,11 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { createWebSocket, type ConnectionState } from './lib/ws'
-  import type { SessionInfo, TimelineEntry, Snapshot } from './lib/types'
+  import type { SessionInfo, TimelineEntry, Snapshot, ObserveEvent } from './lib/types'
   import StatusBar from './components/StatusBar.svelte'
   import TimelineRail from './components/TimelineRail.svelte'
   import StopHero from './components/StopHero.svelte'
   import SourceExplorer from './components/SourceExplorer.svelte'
+  import ObserveView from './components/ObserveView.svelte'
 
   interface SourceView {
     file: string
@@ -21,8 +22,10 @@
   let watches = $state<any[]>([])
   let output = $state<string[]>([])
   let sourceView = $state<SourceView | null>(null)
+  let observeEvents = $state<ObserveEvent[]>([])
+  let observing = $state(false)
 
-  let viewMode = $state<'stop' | 'source'>('stop')
+  let viewMode = $state<'stop' | 'source' | 'observe'>('stop')
 
   onMount(() => {
     fetch('/api/session').then(r => r.json()).then(data => { session = data })
@@ -63,6 +66,16 @@
               viewMode = 'stop'
             }
             break
+          case 'observe':
+            observeEvents = [...observeEvents, event.data]
+            if (viewMode !== 'source') viewMode = 'observe'
+            break
+          case 'observe_status':
+            observing = event.data.observing
+            if (!event.data.observing && viewMode === 'observe' && observeEvents.length === 0) {
+              viewMode = 'stop'
+            }
+            break
         }
       },
       (state) => { connectionState = state }
@@ -73,7 +86,7 @@
 </script>
 
 <div class="h-screen flex flex-col overflow-hidden relative noise">
-  <StatusBar {connectionState} {session} snapshot={viewMode === 'stop' ? currentSnapshot : null} />
+  <StatusBar {connectionState} {session} {observing} snapshot={viewMode === 'stop' ? currentSnapshot : null} />
 
   <div class="flex-1 flex overflow-hidden relative z-10">
     <div class="w-64 flex-shrink-0 overflow-y-auto border-r border-surface-border bg-surface-deep/50">
@@ -81,7 +94,9 @@
     </div>
 
     <div class="flex-1 overflow-y-auto">
-      {#if viewMode === 'source' && sourceView}
+      {#if viewMode === 'observe'}
+        <ObserveView events={observeEvents} />
+      {:else if viewMode === 'source' && sourceView}
         <SourceExplorer source={sourceView} onClose={() => { viewMode = 'stop' }} />
       {:else}
         <StopHero snapshot={currentSnapshot} {watches} {output} />

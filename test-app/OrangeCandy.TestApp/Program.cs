@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using OrangeCandy.Observe;
 using OrangeCandy.TestApp.Models;
 using OrangeCandy.TestApp.Services;
 
@@ -17,6 +18,7 @@ class Program
                 services.AddSingleton<ITaxCalculator, TaxCalculator>();
                 services.AddSingleton<IOrderProcessor, OrderProcessor>();
                 services.AddSingleton<IInventoryService, InventoryService>();
+                services.AddOrangeCandyObserver();
             })
             .ConfigureLogging(logging =>
             {
@@ -27,6 +29,7 @@ class Program
         var processor = host.Services.GetRequiredService<IOrderProcessor>();
         var inventory = host.Services.GetRequiredService<IInventoryService>();
         var logger = host.Services.GetRequiredService<ILogger<Program>>();
+
 
         var allScenarios = BuildScenarios();
 
@@ -65,6 +68,8 @@ class Program
 
             logger.LogInformation("");
         }
+
+        host.Dispose();
     }
 
     private static List<(string Name, Order Order)> BuildScenarios()

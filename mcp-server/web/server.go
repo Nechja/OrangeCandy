@@ -42,6 +42,8 @@ func (s *Server) Start() error {
 	mux.HandleFunc("/api/timeline", s.handleTimeline)
 	mux.HandleFunc("/api/flow", s.handleFlow)
 	mux.HandleFunc("/api/output", s.handleOutput)
+	mux.HandleFunc("POST /api/observe", s.handleObservePost)
+	mux.HandleFunc("GET /api/observe", s.handleObserveGet)
 
 	dist, err := fs.Sub(distFS, "dist")
 	if err != nil {
@@ -106,6 +108,21 @@ func (s *Server) handleFlow(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleOutput(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, s.store.Output(0))
+}
+
+func (s *Server) handleObservePost(w http.ResponseWriter, r *http.Request) {
+	var events []store.ObserveEvent
+	if err := json.NewDecoder(r.Body).Decode(&events); err != nil {
+		http.Error(w, "invalid json", http.StatusBadRequest)
+		return
+	}
+
+	count := s.store.RecordObservations(events)
+	writeJSON(w, map[string]any{"received": count, "observing": s.store.IsObserving()})
+}
+
+func (s *Server) handleObserveGet(w http.ResponseWriter, r *http.Request) {
+	writeJSON(w, s.store.ObserveTrace(0, 0))
 }
 
 func writeJSON(w http.ResponseWriter, data any) {

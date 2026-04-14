@@ -44,6 +44,11 @@ func buildServer(client *dap.Client, snapper *snapshot.Builder, st *store.Store,
 	registerShowSource(server, st, hub, logger)
 	registerShowStop(server, st, hub, logger)
 
+	registerObserveStart(server, st, logger)
+	registerObserveStop(server, st, logger)
+	registerObserveTrace(server, st, logger)
+	registerObserveSearch(server, st, logger)
+
 	return server
 }
 
@@ -469,6 +474,63 @@ func registerShowStop(server *mcp.Server, st *store.Store, hub *web.Hub, logger 
 		})
 
 		return toolJSON(record), nil, nil
+	})
+}
+
+type observeStartArgs struct{}
+
+func registerObserveStart(server *mcp.Server, st *store.Store, logger *slog.Logger) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "observe_start",
+		Description: "Start observing method calls in the .NET app. The app must have OrangeCandy.Observe installed. Events stream to the UI in real time.",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, args observeStartArgs) (*mcp.CallToolResult, any, error) {
+		logger.Info("tool:observe_start")
+		st.StartObserving()
+		st.RecordLifecycle("observe_start", nil)
+		return toolJSON(map[string]string{"status": "observing"}), nil, nil
+	})
+}
+
+type observeStopArgs struct{}
+
+func registerObserveStop(server *mcp.Server, st *store.Store, logger *slog.Logger) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "observe_stop",
+		Description: "Stop observing method calls. Returns the total number of events captured.",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, args observeStopArgs) (*mcp.CallToolResult, any, error) {
+		logger.Info("tool:observe_stop")
+		count := st.StopObserving()
+		st.RecordLifecycle("observe_stop", map[string]any{"event_count": count})
+		return toolJSON(map[string]any{"status": "stopped", "event_count": count}), nil, nil
+	})
+}
+
+type observeTraceArgs struct {
+	Start int `json:"start,omitempty" jsonschema:"Start index (0-based, default 0)"`
+	End   int `json:"end,omitempty" jsonschema:"End index (exclusive, default all)"`
+}
+
+func registerObserveTrace(server *mcp.Server, st *store.Store, logger *slog.Logger) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "observe_trace",
+		Description: "Get the captured method call trace. Each event shows interface, method, arguments, return value, duration, and call depth.",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, args observeTraceArgs) (*mcp.CallToolResult, any, error) {
+		logger.Info("tool:observe_trace", "start", args.Start, "end", args.End)
+		return toolJSON(st.ObserveTrace(args.Start, args.End)), nil, nil
+	})
+}
+
+type observeSearchArgs struct {
+	Method string `json:"method" jsonschema:"Method or interface name to search for"`
+}
+
+func registerObserveSearch(server *mcp.Server, st *store.Store, logger *slog.Logger) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "observe_search",
+		Description: "Search the observation trace for calls to a specific method or interface.",
+	}, func(ctx context.Context, req *mcp.CallToolRequest, args observeSearchArgs) (*mcp.CallToolResult, any, error) {
+		logger.Info("tool:observe_search", "method", args.Method)
+		return toolJSON(st.ObserveSearch(args.Method)), nil, nil
 	})
 }
 

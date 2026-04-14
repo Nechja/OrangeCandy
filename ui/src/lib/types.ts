@@ -61,3 +61,16 @@ export interface OutputLine {
   category: string
   text: string
 }
+
+export interface ObserveEvent {
+  trace_id: string
+  event_type: 'method_enter' | 'method_exit' | 'method_exception'
+  interface: string
+  method: string
+  arguments?: string[]
+  return_value?: string
+  exception?: string
+  duration_ms?: number
+  depth: number
+  timestamp: string
+}

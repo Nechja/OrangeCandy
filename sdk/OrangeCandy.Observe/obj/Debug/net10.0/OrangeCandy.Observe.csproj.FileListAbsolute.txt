@@ -1,0 +1,15 @@
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/bin/Debug/net10.0/OrangeCandy.Observe.deps.json
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/bin/Debug/net10.0/OrangeCandy.Observe.dll
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/bin/Debug/net10.0/OrangeCandy.Observe.pdb
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.csproj.AssemblyReference.cache
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.GeneratedMSBuildEditorConfig.editorconfig
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.AssemblyInfoInputs.cache
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.AssemblyInfo.cs
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.csproj.CoreCompileInputs.cache
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.dll
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/refint/OrangeCandy.Observe.dll
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/OrangeCandy.Observe.pdb
+/home/sidhe/Repos/Nechja/OrangeCandy/sdk/OrangeCandy.Observe/obj/Debug/net10.0/ref/OrangeCandy.Observe.dll
+/home/sidhe/Repos/Nechja/OrangeCandy/test-app/OrangeCandy.TestApp/bin/Debug/output/OrangeCandy.Observe.deps.json
+/home/sidhe/Repos/Nechja/OrangeCandy/test-app/OrangeCandy.TestApp/bin/Debug/output/OrangeCandy.Observe.dll
+/home/sidhe/Repos/Nechja/OrangeCandy/test-app/OrangeCandy.TestApp/bin/Debug/output/OrangeCandy.Observe.pdb

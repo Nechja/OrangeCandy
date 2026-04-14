@@ -2,10 +2,11 @@
   import type { ConnectionState } from '../lib/ws'
   import type { SessionInfo, Snapshot } from '../lib/types'
 
-  let { connectionState, session, snapshot }: {
+  let { connectionState, session, snapshot, observing }: {
     connectionState: ConnectionState
     session: SessionInfo | null
     snapshot: Snapshot | null
+    observing: boolean
   } = $props()
 
   function shortFile(path: string): string {
@@ -53,9 +54,11 @@
     </div>
   {/if}
 
-  <div class="flex-1"></div>
+  {#if observing}
+    <span class="px-1.5 py-0.5 rounded text-[10px] bg-neon-mint/15 text-neon-mint font-bold uppercase tracking-wider anim-pulse">observing</span>
+  {/if}
 
-  <!-- Session state -->
+  <div class="flex-1"></div>
   {#if session}
     {@const state = stateLabels[session.state] || stateLabels.idle}
     <span class="font-mono text-xs {state.class}">{state.text}</span>

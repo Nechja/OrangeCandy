@@ -64,8 +64,10 @@ type Store struct {
 	stops       []StopRecord
 	timeline    []TimelineEntry
 	breakpoints map[string]*Breakpoint
-	output      []OutputLine
-	watches     []Watch
+	output       []OutputLine
+	watches      []Watch
+	observations []ObserveEvent
+	observing    bool
 
 	OnEvent func(eventType string, data any)
 }
