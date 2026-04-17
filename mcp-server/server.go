@@ -19,7 +19,7 @@ import (
 func buildServer(client *dap.Client, snapper *snapshot.Builder, st *store.Store, hub *web.Hub, logger *slog.Logger) *mcp.Server {
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "orangecandy-debug",
-		Version: "0.2.0",
+		Version: version,
 	}, nil)
 
 	registerLaunch(server, client, snapper, st, logger)

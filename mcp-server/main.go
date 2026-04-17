@@ -12,6 +12,8 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+var version = "dev"
+
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelInfo,
@@ -38,7 +40,7 @@ func main() {
 
 	server := buildServer(client, snapper, st, hub, logger)
 
-	slog.Info("OrangeCandy MCP debug server starting")
+	slog.Info("OrangeCandy MCP debug server starting", "version", version)
 	if err := server.Run(context.Background(), &mcp.StdioTransport{}); err != nil {
 		slog.Error("server failed", "error", err)
 		os.Exit(1)
