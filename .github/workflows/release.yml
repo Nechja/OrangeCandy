@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-ui:
+    name: Build UI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Install UI dependencies
+        working-directory: ui
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build UI
+        working-directory: ui
+        run: pnpm build
+
+      - name: Upload UI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dist
+          path: mcp-server/web/dist/
+
+  build-server:
+    name: Build ${{ matrix.target.name }}
+    needs: build-ui
+    runs-on: ${{ matrix.target.runner }}
+    strategy:
+      matrix:
+        target:
+          - name: linux-amd64
+            runner: ubuntu-latest
+            goos: linux
+            goarch: amd64
+            ext: ''
+          - name: linux-arm64
+            runner: ubuntu-latest
+            goos: linux
+            goarch: arm64
+            ext: ''
+          - name: darwin-amd64
+            runner: macos-latest
+            goos: darwin
+            goarch: amd64
+            ext: ''
+          - name: darwin-arm64
+            runner: macos-latest
+            goos: darwin
+            goarch: arm64
+            ext: ''
+          - name: windows-amd64
+            runner: ubuntu-latest
+            goos: windows
+            goarch: amd64
+            ext: '.exe'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Download UI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ui-dist
+          path: mcp-server/web/dist/
+
+      - name: Build binary
+        working-directory: mcp-server
+        env:
+          GOOS: ${{ matrix.target.goos }}
+          GOARCH: ${{ matrix.target.goarch }}
+          CGO_ENABLED: '0'
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          BINARY="orangecandy-debug-${VERSION}-${{ matrix.target.name }}${{ matrix.target.ext }}"
+          go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o "${BINARY}" .
+          echo "BINARY=${BINARY}" >> $GITHUB_ENV
+
+      - name: Generate checksum
+        working-directory: mcp-server
+        run: |
+          if command -v sha256sum >/dev/null; then
+            sha256sum "${BINARY}" > "${BINARY}.sha256"
+          else
+            shasum -a 256 "${BINARY}" > "${BINARY}.sha256"
+          fi
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target.name }}
+          path: |
+            mcp-server/${{ env.BINARY }}
+            mcp-server/${{ env.BINARY }}.sha256
+
+  build-sdk:
+    name: Build NuGet package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Pack SDK
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet pack sdk/OrangeCandy.Observe/ \
+            -c Release \
+            -p:Version=${VERSION} \
+            -p:PackageVersion=${VERSION} \
+            -o artifacts/
+
+      - name: Upload NuGet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-package
+          path: artifacts/*.nupkg
+
+  release:
+    name: Create Release
+    needs: [build-server, build-sdk]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts/binary-* -type f -exec cp {} release/ \;
+          cp artifacts/nuget-package/*.nupkg release/
+          ls -la release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          fail_on_unmatched_files: true

@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install UI dependencies
+        working-directory: ui
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build UI
+        working-directory: ui
+        run: pnpm build
+
+      - name: Build MCP server
+        working-directory: mcp-server
+        run: go build -v ./...
+
+      - name: Vet Go code
+        working-directory: mcp-server
+        run: go vet ./...
+
+      - name: Build .NET SDK
+        run: dotnet build sdk/OrangeCandy.Observe/ -c Release
+
+      - name: Build test app
+        run: dotnet build test-app/OrangeCandy.TestApp/ -c Release
