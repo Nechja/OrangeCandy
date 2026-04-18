@@ -1,8 +1,8 @@
 # OrangeCandy
 
 [![CI](https://github.com/Nechja/OrangeCandy/actions/workflows/ci.yml/badge.svg)](https://github.com/Nechja/OrangeCandy/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/Nechja/OrangeCandy?label=release)](https://github.com/Nechja/OrangeCandy/releases)
-[![License](https://img.shields.io/github/license/Nechja/OrangeCandy)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Nechja/OrangeCandy?include_prereleases&label=release&sort=semver)](https://github.com/Nechja/OrangeCandy/releases)
+[![License](https://img.shields.io/badge/license-Apache%202.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 
 AI-assisted debugging suite for .NET. A single MCP server that provides two complementary tools for AI agents and a live dashboard for us humans.
 
