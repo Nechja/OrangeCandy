@@ -114,6 +114,9 @@ jobs:
   build-sdk:
     name: Build NuGet package
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -129,6 +132,20 @@ jobs:
             -p:Version=${VERSION} \
             -p:PackageVersion=${VERSION} \
             -o artifacts/
+
+      - name: Publish to GitHub Packages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dotnet nuget add source "https://nuget.pkg.github.com/${GITHUB_REPOSITORY_OWNER}/index.json" \
+            --name github \
+            --username "${GITHUB_REPOSITORY_OWNER}" \
+            --password "${GITHUB_TOKEN}" \
+            --store-password-in-clear-text
+          dotnet nuget push "artifacts/*.nupkg" \
+            --source github \
+            --api-key "${GITHUB_TOKEN}" \
+            --skip-duplicate
 
       - name: Upload NuGet artifact
         uses: actions/upload-artifact@v4

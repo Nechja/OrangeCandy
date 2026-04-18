@@ -1,9 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <PackageId>OrangeCandy.Observe</PackageId>
+    <Authors>Nechja</Authors>
+    <Description>AOP observer for .NET — intercepts DI method calls and streams observation events to the OrangeCandy debug server.</Description>
+    <PackageTags>debugging;aop;observability;di;mcp;orangecandy</PackageTags>
+    <RepositoryUrl>https://github.com/Nechja/OrangeCandy</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/Nechja/OrangeCandy</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
