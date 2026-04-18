@@ -48,8 +48,5 @@ jobs:
         working-directory: mcp-server
         run: go vet ./...
 
-      - name: Build .NET SDK
-        run: dotnet build sdk/OrangeCandy.Observe/ -c Release
-
-      - name: Build test app
-        run: dotnet build test-app/OrangeCandy.TestApp/ -c Release
+      - name: Build .NET solution
+        run: dotnet build OrangeCandy.slnx -c Release

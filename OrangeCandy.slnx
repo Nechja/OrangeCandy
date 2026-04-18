@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/sdk/">
+    <Project Path="sdk/OrangeCandy.Observe/OrangeCandy.Observe.csproj" />
+  </Folder>
+  <Folder Name="/test-app/">
+    <Project Path="test-app/OrangeCandy.TestApp/OrangeCandy.TestApp.csproj" />
+  </Folder>
+</Solution>
