@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 )
 
 type Client struct {
@@ -85,9 +86,15 @@ func (c *Client) buildProject(projectPath string) (string, error) {
 		return "", err
 	}
 
-	c.logger.Info("building project", "path", absPath)
+	projectFile, projectDir, err := resolveProjectFile(absPath)
+	if err != nil {
+		return "", err
+	}
 
-	build := exec.Command("dotnet", "build", absPath, "-c", "Debug", "-o", filepath.Join(absPath, "bin", "Debug", "output"))
+	outputDir := filepath.Join(projectDir, "bin", "Debug", "output")
+	c.logger.Info("building project", "file", projectFile, "output", outputDir)
+
+	build := exec.Command("dotnet", "build", projectFile, "-c", "Debug", "-o", outputDir)
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stderr
 
@@ -95,8 +102,8 @@ func (c *Client) buildProject(projectPath string) (string, error) {
 		return "", fmt.Errorf("dotnet build: %w", err)
 	}
 
-	projectName := filepath.Base(absPath)
-	dll := filepath.Join(absPath, "bin", "Debug", "output", projectName+".dll")
+	projectName := strings.TrimSuffix(filepath.Base(projectFile), filepath.Ext(projectFile))
+	dll := filepath.Join(outputDir, projectName+".dll")
 
 	if _, err := os.Stat(dll); err != nil {
 		return "", fmt.Errorf("built DLL not found at %s: %w", dll, err)
@@ -104,6 +111,56 @@ func (c *Client) buildProject(projectPath string) (string, error) {
 
 	c.logger.Info("build complete", "dll", dll)
 	return dll, nil
+}
+
+// resolveProjectFile returns the build target (a file path) and its parent
+// directory. The input may be either a project/solution file or a directory.
+// When given a directory, it picks the single project/solution file inside;
+// if multiple exist, it returns an error listing the candidates.
+func resolveProjectFile(absPath string) (string, string, error) {
+	info, err := os.Stat(absPath)
+	if err != nil {
+		return "", "", fmt.Errorf("stat %s: %w", absPath, err)
+	}
+
+	if !info.IsDir() {
+		if !isProjectExt(filepath.Ext(absPath)) {
+			return "", "", fmt.Errorf("unsupported file extension %q (expected .csproj, .fsproj, .vbproj, .sln, or .slnx)", filepath.Ext(absPath))
+		}
+		return absPath, filepath.Dir(absPath), nil
+	}
+
+	entries, err := os.ReadDir(absPath)
+	if err != nil {
+		return "", "", fmt.Errorf("read dir %s: %w", absPath, err)
+	}
+
+	var candidates []string
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if isProjectExt(filepath.Ext(e.Name())) {
+			candidates = append(candidates, filepath.Join(absPath, e.Name()))
+		}
+	}
+
+	switch len(candidates) {
+	case 0:
+		return "", "", fmt.Errorf("no project or solution file found in %s", absPath)
+	case 1:
+		return candidates[0], absPath, nil
+	default:
+		return "", "", fmt.Errorf("multiple project/solution files in %s: %v — pass a specific file path instead", absPath, candidates)
+	}
+}
+
+func isProjectExt(ext string) bool {
+	switch ext {
+	case ".csproj", ".fsproj", ".vbproj", ".sln", ".slnx":
+		return true
+	}
+	return false
 }
 
 func (c *Client) LastProject() string {

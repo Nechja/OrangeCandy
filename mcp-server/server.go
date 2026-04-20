@@ -53,7 +53,7 @@ func buildServer(client *dap.Client, snapper *snapshot.Builder, st *store.Store,
 }
 
 type launchArgs struct {
-	ProjectPath string   `json:"project_path" jsonschema:"Path to the .NET project directory"`
+	ProjectPath string   `json:"project_path" jsonschema:"Path to a .NET project/solution file (.csproj, .fsproj, .vbproj, .sln, .slnx) or a directory containing exactly one"`
 	Args        []string `json:"args,omitempty" jsonschema:"Command line arguments passed to the .NET app"`
 }
 
