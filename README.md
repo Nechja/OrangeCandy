@@ -3,7 +3,7 @@
 [![CI](https://github.com/Nechja/OrangeCandy/actions/workflows/ci.yml/badge.svg)](https://github.com/Nechja/OrangeCandy/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0%20%2B%20Commons%20Clause-blue)](LICENSE)
 
-AI-assisted debugging suite for .NET. A single MCP server that provides two complementary tools for AI agents and a live dashboard for us humans. Still testing it out in my own every day workflows.
+AI-assisted debugging suite for .NET. A single MCP server that provides two complementary tools for AI agents and a live dashboard for us humans. **Still testing it out in my own every day workflows.**
 
 ## Tools
 
